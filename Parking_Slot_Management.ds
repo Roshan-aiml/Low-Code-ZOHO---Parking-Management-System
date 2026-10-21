@@ -1,0 +1,1084 @@
+/*
+ * Author       : roshan.s.2024.aiml_rajala
+ * Generated on : 21-Oct-2026 11:32:49
+ * Version      : 1.0
+ */
+ application "Parking Slot Management"
+ {
+ 	date format = "dd-MMM-yyyy"
+ 	time zone = "Asia/Kolkata"
+ 	time format = "24-hr"
+
+ 	forms
+	{
+		form Parking_Slot
+		{
+			displayname = "Parking Slot"
+			success message = "Parking Slot Added Successfully"
+			Section
+			(
+				type = section
+	 			row = 1
+	 			column = 0   
+				width = medium
+			)
+			must have unique Slot_Number
+			(
+    			type = text
+				displayname = "Slot Number"
+	 			row = 1
+	 			column = 1   
+				width = medium
+			)
+			must have Zone
+			(
+				type = picklist
+				maxchar = 100
+				values = {"Zone A","Zone B","Zone C"}
+	 			row = 1
+	 			column = 1   
+				width = medium
+			)
+			must have Slot_Type
+			(
+				type = picklist
+				displayname = "Slot Type"
+				maxchar = 100
+				values = {"Car","Bike","EV Charging"}
+	 			row = 1
+	 			column = 1   
+				width = medium
+			)
+			must have Hourly_Rate
+			(
+				type = number
+				displayname = "Hourly Rate"
+	 			row = 1
+	 			column = 1   
+				width = medium
+			)
+			must have Status
+			(
+				type = picklist
+				maxchar = 100
+				values = {"Available","Occupied","Under Maintenance"}
+				initial value = "Available"
+	 			row = 1
+	 			column = 1   
+				width = medium
+			)
+	
+			actions
+			{
+				on add
+				{
+					submit
+					(
+   						type = submit
+   						displayname = "Submit"
+					)
+				}
+				on edit
+				{
+					update
+					(
+   						type = submit
+   						displayname = "Update"
+					)
+					cancel
+					(
+   						type = cancel
+   						displayname = "Cancel"
+					)
+				}
+			}
+		}
+		form Vehicle_Booking
+		{
+			displayname = "Vehicle Booking"
+			success message = "Data Added Successfully!"
+			Section
+			(
+				type = section
+	 			row = 1
+	 			column = 0   
+				width = medium
+			)
+			must have Vehicle_Number
+			(
+    			type = text
+				displayname = "Vehicle Number"
+	 			row = 1
+	 			column = 1   
+				width = medium
+			)
+			must have Owner_Name
+			(
+    			type = text
+				displayname = "Owner Name"
+	 			row = 1
+	 			column = 1   
+				width = medium
+			)
+			Phone_Number1
+			(
+    			type = phonenumber
+				displayname = "Phone Number"
+	 			row = 1
+	 			column = 1   
+				width = medium
+				personal data = true
+			)
+			must have Vehicle_Type
+			(
+				type = picklist
+				displayname = "Vehicle Type"
+				maxchar = 100
+				values = {"Car","Bike","EV Charging"}
+	 			row = 1
+	 			column = 1   
+				width = medium
+			)
+			must have Parking_Slot
+			(
+				type = picklist	
+				displayname = "Parking Slot"
+				values  = Parking_Slot.ID
+    			displayformat = [Slot_Number]
+				sortorder = ascending
+	 			row = 1
+	 			column = 1   
+				width = medium
+			)
+			must have Entry_Time
+			(
+    			type = datetime
+				displayname = "Entry Time"
+				timedisplayoptions = "hh:mm:ss"
+				alloweddays = 0,1,2,3,4,5,6
+	 			row = 1
+	 			column = 1   
+				width = medium
+			)
+			Exit_Time
+			(
+    			type = datetime
+				displayname = "Exit Time"
+				timedisplayoptions = "hh:mm:ss"
+				alloweddays = 0,1,2,3,4,5,6
+	 			row = 1
+	 			column = 1   
+				width = medium
+			)
+			Duration_Hours
+			(
+				type = decimal
+				displayname = "Duration Hours"
+	 			row = 1
+	 			column = 1   
+				width = medium
+			)
+			Amount
+			(
+				type = INR
+				format = commadotindian
+	 			row = 1
+	 			column = 1   
+				width = medium
+			)
+			Booking_Status
+			(
+				type = picklist
+				displayname = "Booking Status"
+				maxchar = 100
+				values = {"Parked","Exited"}
+				initial value = "Parked"
+	 			row = 1
+	 			column = 1   
+				width = medium
+			)
+	
+			actions
+			{
+				on add
+				{
+					submit
+					(
+   						type = submit
+   						displayname = "Submit"
+					)
+				}
+				on edit
+				{
+					update
+					(
+   						type = submit
+   						displayname = "Update"
+					)
+					cancel
+					(
+   						type = cancel
+   						displayname = "Cancel"
+					)
+				}
+			}
+		}
+	}
+	reports
+	{
+		default list All_Parking_Slots
+		{
+			displayName = "All Parking Slots"
+			show all rows from Parking_Slot    
+			(
+				Slot_Number as "Slot Number"
+				Zone
+				Slot_Type as "Slot Type"
+				Hourly_Rate as "Hourly Rate"
+				Status
+			)
+		}
+		default list Vehicle_Booking_Report
+		{
+			displayName = "Vehicle Booking Report"
+			show all rows from Vehicle_Booking    
+			(
+				Vehicle_Number as "Vehicle Number"
+				Owner_Name as "Owner Name"
+				Phone_Number1 as "Phone Number"
+				(
+					displayformat = plainnumber 
+				)
+				Vehicle_Type as "Vehicle Type"
+				Parking_Slot as "Parking Slot"
+				Entry_Time as "Entry Time"
+				Exit_Time as "Exit Time"
+				Duration_Hours as "Duration Hours"
+				Amount
+				Booking_Status as "Booking Status"
+			)
+			custom actions
+			(
+				"Checkout"
+				(
+	  			workflow = Checkout_Vehicle
+				show action in edit record menu = true
+				confirmation before execution
+				(
+					message for individual record = "Execute the Checkout action for this record?"
+					confirm button text = "Yes"		
+					cancel button text = "No"
+				)
+				)
+			)
+		}
+		kanban Slot_Board
+		{
+			displayName = "Slot Board"
+			show all rows from Parking_Slot    
+			(
+				Slot_Number as "Slot Number"
+				Zone
+				Slot_Type as "Slot Type"
+				Hourly_Rate as "Hourly Rate"
+				Status
+			)
+			options
+			(
+	 			display field = Status
+				record count  = enable
+	 		)
+		}
+		calendar Booking_Calendar
+		{
+			displayName = "Booking Calendar"
+			show all rows from Vehicle_Booking    
+			(
+				Vehicle_Number as "Vehicle Number"
+				Owner_Name as "Owner Name"
+				Phone_Number1 as "Phone Number"
+				(
+					displayformat = plainnumber 
+				)
+				Vehicle_Type as "Vehicle Type"
+				Parking_Slot as "Parking Slot"
+				Entry_Time as "Entry Time"
+				Exit_Time as "Exit Time"
+				Duration_Hours as "Duration Hours"
+				Amount
+				Booking_Status as "Booking Status"
+			)
+			options
+			(
+				display field = Vehicle_Number
+				start date = Entry_Time
+			)
+		}
+	}
+	pages
+	{
+		page Parking_Command_Center
+		{
+			displayname = "Parking Command Center"
+			Content="<zml    \t\t\n\t\t\n\t\t\n\t\t\n\t\t\n>\n\t<layout>\n\t<row>\n\t<column\n   \t\t width='100%'\n   \t>\n\t<panel elementName='Panel'\n \n >\n\t<pr \n\t\t\twidth='fill'\n\t\theight='fill'\n>\n\t<pc \n\t\tpadding = '15px'\n\tbgColor = '#FFFFFF'\n\n\t\twidth = '25%'\n\t\thAlign = 'center'\n\t\tvAlign = 'middle'\n>\n\t<pr \n\t\t\twidth='auto'\n\t\theight='auto'\n>\n\t<pc \n\t\tpadding = '5px'\n\n>\n\t<pr \n\t>\n\t<pc \n\t\n>\n\t<text \n\n\tmargin = '0px'\n\tpadding = '0px'\n\tcolor = '#1F4E79'\n\tsize = '34px'\n\tbold = 'true' \n\ttype = 'Form Data'\n\n\tbgColor = 'transparent'\n        bgColorType = 'noFill'\n\tcornerRadius = '0px'\n\n\n\tdisplayType = 'actual'\n\tthousandsSeperator = 'LOCALE'\n\tdecimalSeperator = 'DOT'\n\tnumberScale = 'none'\n\n\n\n    borderColor = '#1F4E79'\n    borderWidth = '0px'\n\n\t  value = 'thisapp.Parking_Slot.ID.count'\n>\n</text>\n\n</pc>\n</pr><pr \n\t>\n\t<pc \n\t\n>\n\t<text \n\n\tmargin = '0px'\n\tpadding = '0px'\n\tcolor = '#333333'\n\tsize = '15px'\n\ttype = 'Text'\n\n\tbgColor = 'transparent'\n        bgColorType = 'noFill'\n\tcornerRadius = '0px'\n\n\n\n\n\n    borderColor = '#333333'\n    borderWidth = '0px'\n\n\t  value = 'Total Parking Slots'\n>\n</text>\n\n</pc>\n</pr>\n</pc>\n</pr>\n</pc><pc \n\t\tpadding = '15px'\n\tbgColor = '#FFFFFF'\n\n\t\twidth = '25%'\n\t\thAlign = 'center'\n\t\tvAlign = 'middle'\n>\n\t<pr \n\t\t\twidth='auto'\n\t\theight='auto'\n>\n\t<pc \n\t\tpadding = '5px'\n\n>\n\t<pr \n\t>\n\t<pc \n\t\n>\n\t<text \n\n\tmargin = '0px'\n\tpadding = '0px'\n\tcolor = '#2E8B57'\n\tsize = '34px'\n\tbold = 'true' \n\ttype = 'Form Data'\n\n\tbgColor = 'transparent'\n        bgColorType = 'noFill'\n\tcornerRadius = '0px'\n\n\n\tdisplayType = 'actual'\n\tthousandsSeperator = 'LOCALE'\n\tdecimalSeperator = 'DOT'\n\tnumberScale = 'none'\n\n\n\n    borderColor = '#2E8B57'\n    borderWidth = '0px'\n\n\t\tcriteria = 'Status == &quot;Available&quot;'\n\t  value = 'thisapp.Parking_Slot.ID.count'\n>\n</text>\n\n</pc>\n</pr><pr \n\t>\n\t<pc \n\t\n>\n\t<text \n\n\tmargin = '0px'\n\tpadding = '0px'\n\tcolor = '#333333'\n\tsize = '15px'\n\ttype = 'Text'\n\n\tbgColor = 'transparent'\n        bgColorType = 'noFill'\n\tcornerRadius = '0px'\n\n\n\n\n\n    borderColor = '#333333'\n    borderWidth = '0px'\n\n\t  value = 'Available Now'\n>\n</text>\n\n</pc>\n</pr>\n</pc>\n</pr>\n</pc><pc \n\t\tpadding = '15px'\n\tbgColor = '#FFFFFF'\n\n\t\twidth = '25%'\n\t\thAlign = 'center'\n\t\tvAlign = 'middle'\n>\n\t<pr \n\t\t\twidth='auto'\n\t\theight='auto'\n>\n\t<pc \n\t\tpadding = '5px'\n\n>\n\t<pr \n\t>\n\t<pc \n\t\n>\n\t<text \n\n\tmargin = '0px'\n\tpadding = '0px'\n\tcolor = '#D9342B'\n\tsize = '34px'\n\tbold = 'true' \n\ttype = 'Form Data'\n\n\tbgColor = 'transparent'\n        bgColorType = 'noFill'\n\tcornerRadius = '0px'\n\n\n\tdisplayType = 'actual'\n\tthousandsSeperator = 'LOCALE'\n\tdecimalSeperator = 'DOT'\n\tnumberScale = 'none'\n\n\n\n    borderColor = '#D9342B'\n    borderWidth = '0px'\n\n\t\tcriteria = 'Status == &quot;Occupied&quot;'\n\t  value = 'thisapp.Parking_Slot.ID.count'\n>\n</text>\n\n</pc>\n</pr><pr \n\t>\n\t<pc \n\t\n>\n\t<text \n\n\tmargin = '0px'\n\tpadding = '0px'\n\tcolor = '#333333'\n\tsize = '15px'\n\ttype = 'Text'\n\n\tbgColor = 'transparent'\n        bgColorType = 'noFill'\n\tcornerRadius = '0px'\n\n\n\n\n\n    borderColor = '#333333'\n    borderWidth = '0px'\n\n\t  value = 'Occupied Now'\n>\n</text>\n\n</pc>\n</pr>\n</pc>\n</pr>\n</pc><pc \n\t\tpadding = '15px'\n\tbgColor = '#FFFFFF'\n\n\t\twidth = '25%'\n\t\thAlign = 'center'\n\t\tvAlign = 'middle'\n>\n\t<pr \n\t\t\twidth='auto'\n\t\theight='auto'\n>\n\t<pc \n\t\tpadding = '5px'\n\n>\n\t<pr \n\t>\n\t<pc \n\t\n>\n\t<text \n\n\tmargin = '0px'\n\tpadding = '0px'\n\tcolor = '#B8860B'\n\tsize = '34px'\n\tbold = 'true' \n\ttype = 'Form Data'\n\n\tbgColor = 'transparent'\n        bgColorType = 'noFill'\n\tcornerRadius = '0px'\n\n\n\tdisplayType = 'actual'\n\tthousandsSeperator = 'LOCALE'\n\tdecimalSeperator = 'DOT'\n\tnumberScale = 'none'\n\n\n\n    borderColor = '#B8860B'\n    borderWidth = '0px'\n\n\t\tcriteria = 'Booking_Status == &quot;Exited&quot;'\n\t  value = 'thisapp.Vehicle_Booking.Amount.sum'\n>\n</text>\n\n</pc>\n</pr><pr \n\t>\n\t<pc \n\t\n>\n\t<text \n\n\tmargin = '0px'\n\tpadding = '0px'\n\tcolor = '#333333'\n\tsize = '15px'\n\ttype = 'Text'\n\n\tbgColor = 'transparent'\n        bgColorType = 'noFill'\n\tcornerRadius = '0px'\n\n\n\n\n\n    borderColor = '#333333'\n    borderWidth = '0px'\n\n\t  value = 'Revenue Collected (Rs.)'\n>\n</text>\n\n</pc>\n</pr>\n</pc>\n</pr>\n</pc>\n</pr>\n</panel>\n</column>\n</row><row>\n\t<column\n   \t\t width='100%'\n   \t>\n\t<chart \n\telementName='Chart'\n\n\ttype = 'Column'\n\txtitle = 'Vehicle Type'\n\tytitle = 'Revenue (Rs.)'\n\tbgColor = '#FFFFFF'\n\ttheme = 'theme1'\n\tlegendPos = 'center.top'\n\theightType = 'auto'\n\theightValue = '300px'\n\tappLinkName = 'thisapp'\n\tformLinkName = 'Vehicle_Booking'\n\txfield = 'Vehicle_Type'\n\tyfields = 'sum:Amount'\n/>\n\n</column>\n</row><row>\n\t<column\n   \t\t width='100%'\n   \t>\n\t<report \n\telementName='Report'\n\n\t\tappLinkName = 'thisapp'\n\t\tlinkName = 'Vehicle_Booking_Report'\n\t\n\t\tiszreport = 'false'\n\theightType = 'auto'\n\theightValue = '700'\n/>\n</column>\n</row>\n</layout>\n</zml>"
+		}
+	}
+
+
+		 functions
+		 {
+			 Deluge
+			 {
+				 void checkoutVehicle(int bookingId)
+                 {
+                 	// One-click checkout: records exit time, calculates fee and releases the slot
+                 	bk = Vehicle_Booking[ID == bookingId];
+                 	if(bk.Booking_Status == "Exited")
+                 	{
+                 		return;
+                 	}
+                 	slot = Parking_Slot[ID == bk.Parking_Slot];
+                 	exitTime = zoho.currenttime;
+                 	diffMs = exitTime.toLong() - bk.Entry_Time.toLong();
+                 	billHours = (diffMs / 3600000.0).ceil();
+                 	if(billHours < 1)
+                 	{
+                 		billHours = 1;
+                 	}
+                 	bk.Exit_Time=exitTime;
+                 	bk.Duration_Hours=(diffMs / 3600000.0).round(2);
+                 	bk.Amount=billHours * slot.Hourly_Rate;
+                 	bk.Booking_Status="Exited";
+                 	slot.Status="Available";
+                 }
+			 }
+		 }
+
+
+		workflow
+		{
+		form
+		{
+			Check_Slot_Availability as "Check Slot Availability"
+			{
+				type =  form
+				form = Vehicle_Booking
+
+				record event = on add
+
+				on validate
+				{
+					actions 
+					{
+						custom deluge script
+						(
+											// Allow booking only when the selected slot is Available
+										slot = Parking_Slot[ID == input.Parking_Slot];
+										if(slot.Status != "Available")
+										{
+											alert "Slot " + slot.Slot_Number + " is " + slot.Status + ". Please choose an Available slot.";
+											cancel submit;
+										}
+										// Vehicle type must match the slot type
+										if(slot.Slot_Type != input.Vehicle_Type)
+										{
+											alert "Slot " + slot.Slot_Number + " is reserved for " + slot.Slot_Type + " vehicles.";
+											cancel submit;
+										}
+										input.Booking_Status = "Parked";
+						)
+					}
+				}
+
+			}
+			Mark_Slot_Occupied as "Mark Slot Occupied"
+			{
+				type =  form
+				form = Vehicle_Booking
+
+				record event = on add
+
+				on success
+				{
+					actions 
+					{
+						custom deluge script
+						(
+											// After a vehicle is parked, mark the slot as Occupied
+										slot = Parking_Slot[ID == input.Parking_Slot];
+										slot.Status="Occupied";
+										info "Slot " + slot.Slot_Number + " is now Occupied by " + input.Vehicle_Number;
+						)
+					}
+				}
+
+			}
+			Calculate_Parking_Fee as "Calculate Parking Fee"
+			{
+				type =  form
+				form = Vehicle_Booking
+
+				record event = on edit
+
+				on validate
+				{
+					actions 
+					{
+						custom deluge script
+						(
+											// When Exit Time is entered, calculate duration and parking fee
+										if(input.Exit_Time != null)
+										{
+											if(input.Exit_Time <= input.Entry_Time)
+											{
+												alert "Exit Time must be after Entry Time.";
+												cancel submit;
+											}
+											slot = Parking_Slot[ID == input.Parking_Slot];
+											diffMs = input.Exit_Time.toLong() - input.Entry_Time.toLong();
+											hours = (diffMs / 3600000.0).round(2);
+											billHours = (diffMs / 3600000.0).ceil();
+											if(billHours < 1)
+											{
+												billHours = 1;
+											}
+											input.Duration_Hours = hours;
+											input.Amount = billHours * slot.Hourly_Rate;
+											input.Booking_Status = "Exited";
+										}
+						)
+					}
+				}
+
+			}
+			Release_Slot_on_Exit as "Release Slot on Exit"
+			{
+				type =  form
+				form = Vehicle_Booking
+
+				record event = on edit
+
+				on success
+				{
+					actions 
+					{
+						custom deluge script
+						(
+											// When the vehicle exits, make the slot Available again
+										if(input.Booking_Status == "Exited")
+										{
+											slot = Parking_Slot[ID == input.Parking_Slot];
+											slot.Status="Available";
+											info "Slot " + slot.Slot_Number + " released. Fee collected: Rs." + input.Amount;
+										}
+						)
+					}
+				}
+
+			}
+			Set_Entry_Time as "Set Entry Time"
+			{
+				type =  form
+				form = Vehicle_Booking
+
+				record event = on add
+
+				on load
+				{
+					actions 
+					{
+						custom deluge script
+						(
+											// New booking: entry time = now, exit details are filled later
+										input.Entry_Time = zoho.currenttime;
+										input.Booking_Status = "Parked";
+										hide Exit_Time;
+										hide Duration_Hours;
+										hide Amount;
+										disable Booking_Status;
+						)
+					}
+				}
+
+			}
+		}
+
+
+
+
+
+
+		functions
+		{
+			Checkout_Vehicle as "Checkout Vehicle"
+			{
+				type =  functions
+				form = Vehicle_Booking
+				execution type = for each record	
+				on start
+				{
+					actions 
+					{
+						thisapp.checkoutVehicle(ID);
+					}
+				}
+			}
+		}
+	}
+	share_settings
+	{
+			"Read"
+			{
+				name = "Read"
+				type = Users_Permissions
+				permissions = {Chat:true, Predefined:true, ApiAccess:true, PIIAccess:true, ePHIAccess:true}
+				description = "This profile will have read permission for all components\n"
+			}
+			"Write"
+			{
+				name = "Write"
+				type = Users_Permissions
+				permissions = {Chat:true, Predefined:true, ApiAccess:true, PIIAccess:true, ePHIAccess:true}
+				description = "This profile will have write permission for all components\n"
+			}
+			"Developer"
+			{
+				name = "Developer"
+				type = Developer
+				permissions = {Chat:false, Predefined:true, ApiAccess:true, PIIAccess:true, ePHIAccess:true}
+				description = "Developer Profile\n"
+			}
+			"Administrator"
+			{
+				name = "Administrator"
+				type = Users_Permissions
+				permissions = {Chat:true, Predefined:true, ApiAccess:true, PIIAccess:true, ePHIAccess:true}
+				description = "This profile will have all the permissions.\n"
+			}
+			"Customer"
+			{
+				name = "Customer"
+				type = Customer_Portal
+				permissions = {Chat:true, Predefined:true, ApiAccess:true, PIIAccess:true, ePHIAccess:true}
+				description = "This is the default profile having only add and view permission.\n"
+			}
+			roles
+			{
+				"CEO"
+				{
+					description = "User belonging to this role can access data of all other users."
+				}
+			}
+	}
+
+	customize
+	{
+		icon
+		{
+			text = "PSM"
+			background color = "theme"
+			foreground color = "#ffffff"
+		}
+	}
+
+	web
+	{
+		forms
+		{
+			form Parking_Slot
+			{
+				label placement = left
+			}
+			form Vehicle_Booking
+			{
+				label placement = left
+			}
+		}
+		reports
+		{
+			report All_Parking_Slots
+			{
+				quickview
+				(
+					layout
+					(
+						datablock1
+						(
+							fields
+							(
+								Slot_Number as "Slot Number"
+								Zone
+								Slot_Type as "Slot Type"
+								Hourly_Rate as "Hourly Rate"
+								Status
+							)
+						)
+					)
+						menu
+						(
+							header
+							(
+								Edit 
+								Duplicate 
+								Delete 
+							)
+						record
+						(
+							Edit   	   
+							Duplicate   	   
+							Delete   	   
+    					)
+						)
+    				action
+    				(
+						on click
+						(
+							View Record   	   
+    					)
+						on right click
+						(
+							Edit   	   
+							Delete   	   
+							Duplicate   	   
+							View Record   	   
+    					)
+     				)
+				)
+
+				detailview
+				(
+					layout
+					(
+						datablock1
+						(
+							fields
+							(
+								Slot_Number as "Slot Number"
+								Zone
+								Slot_Type as "Slot Type"
+								Hourly_Rate as "Hourly Rate"
+								Status
+							)
+						)
+					)
+						menu
+						(
+							header
+							(
+								Edit 
+								Duplicate 
+								Delete 
+							)
+						)
+				)
+			}
+			report Vehicle_Booking_Report
+			{
+				quickview
+				(
+					layout
+					(
+						datablock1
+						(
+							fields
+							(
+								Vehicle_Number as "Vehicle Number"
+								Owner_Name as "Owner Name"
+								Phone_Number1 as "Phone Number"
+								Vehicle_Type as "Vehicle Type"
+								Parking_Slot as "Parking Slot"
+								Entry_Time as "Entry Time"
+								Exit_Time as "Exit Time"
+							)
+						)
+					)
+						menu
+						(
+							header
+							(
+								Edit 
+								Duplicate 
+								Delete 
+							)
+						record
+						(
+							Edit   	   
+							Duplicate   	   
+							Delete   	   
+							"Checkout"
+    					)
+						)
+    				action
+    				(
+						on click
+						(
+							View Record   	   
+    					)
+						on right click
+						(
+							Edit   	   
+							Delete   	   
+							Duplicate   	   
+							View Record   	   
+    					)
+     				)
+				)
+
+				detailview
+				(
+					layout
+					(
+						datablock1
+						(
+							fields
+							(
+								Vehicle_Number as "Vehicle Number"
+								Owner_Name as "Owner Name"
+								Phone_Number1 as "Phone Number"
+								Vehicle_Type as "Vehicle Type"
+								Parking_Slot as "Parking Slot"
+								Entry_Time as "Entry Time"
+								Exit_Time as "Exit Time"
+								Duration_Hours as "Duration Hours"
+								Amount
+								Booking_Status as "Booking Status"
+							)
+						)
+					)
+						menu
+						(
+							header
+							(
+								Edit 
+								Duplicate 
+								Delete 
+							)
+						)
+				)
+			}
+			report Slot_Board
+			{
+				quickview
+				(
+					layout
+					(
+		 				type = 1
+						datablock1
+						(
+							layout type = 1
+							fields
+							(
+								Slot_Number as "Slot Number"
+								Zone
+							)
+						)
+					)
+						menu
+						(
+							header
+							(
+								Edit 
+								Duplicate 
+								Delete 
+							)
+						record
+						(
+							Edit   	   
+							Duplicate   	   
+							Delete   	   
+    					)
+						)
+    				action
+    				(
+						on click
+						(
+							View Record   	   
+    					)
+						on right click
+						(
+							Edit   	   
+							Delete   	   
+							Duplicate   	   
+							View Record   	   
+    					)
+     				)
+				)
+
+				detailview
+				(
+					layout
+					(
+						datablock1
+						(
+							fields
+							(
+								Slot_Number as "Slot Number"
+								Zone
+								Slot_Type as "Slot Type"
+								Hourly_Rate as "Hourly Rate"
+								Status
+							)
+						)
+					)
+						menu
+						(
+							header
+							(
+								Edit 
+								Duplicate 
+								Delete 
+							)
+						)
+				)
+			}
+			report Booking_Calendar
+			{
+				quickview
+				(
+					layout
+					(
+		 				type = 1
+						datablock1
+						(
+							layout type = 1
+							fields
+							(
+								Vehicle_Number as "Vehicle Number"
+								Owner_Name as "Owner Name"
+							)
+						)
+					)
+						menu
+						(
+							header
+							(
+							)
+						record
+						(
+							Edit   	   
+							Duplicate   	   
+							Delete   	   
+    					)
+						)
+    				action
+    				(
+						on click
+						(
+							View Record   	   
+    					)
+						on right click
+						(
+							Edit   	   
+							Delete   	   
+							Duplicate   	   
+							View Record   	   
+    					)
+     				)
+				)
+
+				detailview
+				(
+					layout
+					(
+						datablock1
+						(
+							fields
+							(
+								Vehicle_Number as "Vehicle Number"
+								Owner_Name as "Owner Name"
+								Phone_Number1 as "Phone Number"
+								Vehicle_Type as "Vehicle Type"
+								Parking_Slot as "Parking Slot"
+								Entry_Time as "Entry Time"
+								Exit_Time as "Exit Time"
+								Duration_Hours as "Duration Hours"
+								Amount
+								Booking_Status as "Booking Status"
+							)
+						)
+					)
+						menu
+						(
+							header
+							(
+								Edit 
+								Duplicate 
+								Delete 
+							)
+						)
+				)
+			}
+		}
+		menu
+		{
+			space Space
+			{
+				displayname = "Space"
+				icon = "objects-spaceship"
+
+				section Parking_Slots
+				{
+					displayname = "Parking Slots"
+					icon = "shopping-bag-remove-22"
+					form  Parking_Slot
+					{
+						icon = "shopping-mobile-cart"
+					}
+					report All_Parking_Slots
+					{
+						icon = "tech-desktop"
+					}
+					report Slot_Board
+					{
+						icon = "shopping-mobile-cart"
+					}
+				}
+				section ZC_App_Preferences
+				{
+					displayname = "App Preferences"
+					icon = "design-app"
+					systemcomponent
+					{
+						type = localization
+						displayname = "Language Selection"
+						icon = "education-language"
+					}
+					systemcomponent
+					{
+						type = connection
+						displayname = "Integrations"
+						icon = "tech-2-connection"
+					}
+				}
+				section ZC_Approvals
+				{
+					displayname = "Approvals"
+					icon = "ui-2-hourglass"
+					systemcomponent
+					{
+						type = approval
+						approval status = pending
+						displayname = "Pending Tasks"
+						icon = "ui-2-hourglass"
+					}
+					systemcomponent
+					{
+						type = approval
+						approval status = completed
+						displayname = "Completed Tasks"
+						icon = "design-todo"
+					}
+				}
+				section SharedAnalytics_Section
+				{
+					type = shared_user_report_section
+					displayname = "Reports"
+					icon = "business-chart-bar-33"
+				}
+				section Vehicle_Booking
+				{
+					displayname = "Vehicle Booking"
+					icon = "transportation-car"
+					form  Vehicle_Booking
+					{
+						icon = "transportation-car"
+					}
+					report Vehicle_Booking_Report
+					{
+						icon = "tech-desktop"
+					}
+					report Booking_Calendar
+					{
+						icon = "transportation-car"
+					}
+				}
+				section Parking_Command_Center
+				{
+					displayname = "Parking Command Center"
+					icon = "media-1-focus-32"
+					page Parking_Command_Center
+					{
+						icon = "media-1-focus-32"
+					}
+				}
+			}
+			preference
+			{
+				icon
+				{
+					style = outline
+				}
+			}
+		}
+		customize
+		{
+			font = "lato"
+			color options
+			{
+				color = "11"
+			}
+			logo
+			{
+				preference = "app_icon"
+				placement = "left"
+			}
+		}
+	}
+	phone
+	{
+		forms
+		{
+			form Parking_Slot
+			{
+				label placement = auto
+			}
+			form Vehicle_Booking
+			{
+				label placement = auto
+			}
+		}
+		customize
+		{
+			layout = twocolumn
+			font = "default"
+			style = "3"
+			color options
+			{
+				color = chryslerpurple
+			}
+			logo
+			{
+				preference = "none"
+			}
+		}
+	}
+	tablet
+	{
+		forms
+		{
+			form Parking_Slot
+			{
+				label placement = auto
+			}
+			form Vehicle_Booking
+			{
+				label placement = auto
+			}
+		}
+		customize
+		{
+			layout = slidingpane
+			font = "default"
+			style = "3"
+			color options
+			{
+				color = amethyst
+			}
+			logo
+			{
+				preference = "none"
+			}
+		}
+	}
+	
+}
